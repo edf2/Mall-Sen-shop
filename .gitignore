@@ -1,7 +1,26 @@
-**/target/
-.idea
-*.iml
+# 忽略 Java 编译产物
+target/
 *.class
+*.jar
+*.war
 
-.env
-!.env.example
+# 忽略 IDEA 配置
+.idea/
+*.iml
+
+# 忽略前端构建产物和依赖
+project-sky-admin-vue-ts/node_modules/
+project-sky-admin-vue-ts/dist/
+project-sky-admin-vue-ts/__nginx_deploy_tmp__/
+
+# 忽略用户上传的文件
+uploads/
+
+# 忽略日志和错误文件
+*.log
+app.err
+
+# 忽略所有包含敏感信息的本地配置文件
+**/application-dev.yml
+**/.env.development
+**/.env.production
