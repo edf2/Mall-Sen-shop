@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.mallsen.mapper.ProductMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into product (name,category_id,price,image,description,status,stock,low_stock_warning,sales,create_time,update_time,create_user,update_user)
+        values
+        (#{name},#{categoryId},#{price},#{image},#{description},#{status},#{stock},#{lowStockWarning},#{sales},#{createTime},#{updateTime},#{createUser},#{updateUser})
+    </insert>
+
+    <update id="update">
+        update product
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="stock != null">stock = #{stock},</if>
+            <if test="lowStockWarning != null">low_stock_warning = #{lowStockWarning},</if>
+            <if test="sales != null">sales = #{sales},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateUser != null">update_user = #{updateUser}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id="pageQuery" resultType="com.mallsen.vo.ProductVO">
+            select d.* , c.name as categoryName from product d left outer join category c on d.category_id = c.id
+            <where>
+                <if test="name != null and name != ''"> and d.name like concat('%',#{name},'%') </if>
+                <if test="categoryId != null"> and d.category_id = #{categoryId} </if>
+                <if test="status != null"> and d.status = #{status} </if>
+            </where>
+            order by d.create_time desc
+    </select>
+
+    <select id="list" resultType="com.mallsen.entity.Product">
+        select * from product
+        <where>
+            <if test="name != null and name != ''"> and name like concat('%',#{name},'%') </if>
+            <if test="categoryId != null"> and category_id = #{categoryId} </if>
+            <if test="status != null"> and status = #{status} </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="countByMap" resultType="java.lang.Integer">
+        select count(id) from product
+        <where>
+            <if test="status != null"> and status = #{status} </if>
+            <if test="categoryId != null"> and category_id = #{categoryId} </if>
+        </where>
+    </select>
+
+
+    <select id="getZeroStockList" resultType="com.mallsen.vo.LowStockVO">
+        select p.id, p.name, p.stock, p.low_stock_warning as lowStockWarning, p.status, c.name as categoryName
+        from product p left outer join category c on p.category_id = c.id
+        where p.stock = 0
+        order by p.update_time desc
+    </select>
+
+    <select id="getLowStockList" resultType="com.mallsen.vo.LowStockVO">
+        select p.id, p.name, p.stock, p.low_stock_warning as lowStockWarning, p.status, c.name as categoryName
+        from product p left outer join category c on p.category_id = c.id
+        where p.stock > 0 and p.stock &lt;= p.low_stock_warning
+        order by p.stock asc
+    </select>
+
+    <select id="getCategoryInventoryDistribution" resultType="java.util.Map">
+        select c.id as categoryId,
+               c.name as categoryName,
+               count(p.id) as productCount,
+               coalesce(sum(p.stock), 0) as totalStock
+        from category c
+        left outer join product p on c.id = p.category_id
+        group by c.id, c.name
+        order by totalStock desc
+    </select>
+
+</mapper>

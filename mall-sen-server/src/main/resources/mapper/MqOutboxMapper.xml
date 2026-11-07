@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mallsen.mapper.MqOutboxMapper">
+
+    <insert id="insert" parameterType="MqOutbox" useGeneratedKeys="true" keyProperty="id">
+        insert into mq_outbox (order_id, order_number, payload, status, retry_count, create_time, send_time)
+        values (#{orderId}, #{orderNumber}, #{payload}, #{status}, #{retryCount}, #{createTime}, #{sendTime})
+    </insert>
+
+    <select id="selectPending" resultType="MqOutbox">
+        select id, order_id, order_number, payload, status, retry_count, create_time, send_time
+        from mq_outbox
+        where status = 0
+        order by create_time asc
+        limit #{limit}
+    </select>
+
+    <update id="markSent">
+        update mq_outbox
+        set status = 1, send_time = now()
+        where id = #{id} and status = 0
+    </update>
+
+    <update id="markFailed">
+        update mq_outbox
+        set status = 2, retry_count = retry_count + 1
+        where id = #{id} and status = 0
+    </update>
+
+    <update id="incrementRetryCount">
+        update mq_outbox
+        set retry_count = retry_count + 1
+        where id = #{id} and status = 0
+    </update>
+
+</mapper>
