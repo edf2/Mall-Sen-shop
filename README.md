@@ -28,7 +28,7 @@
 - **前端**：uni-app（小程序 + H5）/ 商家后台 Vue3 + TS
 - **基础设施**：MySQL 8 / Redis 7 / RabbitMQ 3.13（docker-compose 一键拉起）
 
-## 核心设计亮点（面试速览）
+## 核心设计亮点
 
 - **事务提交后副作用**：Outbox 消息投递、WebSocket 来单推送、缓存失效统一推迟到 `afterCommit`，杜绝「事务回滚却已发出副作用」。
 - **可靠异步销量确认**：本地事务表 + 定时兜底（Outbox 模式），配合 Redis 幂等实现 at-least-once。
